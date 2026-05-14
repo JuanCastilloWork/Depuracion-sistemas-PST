@@ -8,7 +8,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--folder", type=Path, help='Carpetas donde se encuentran los csv')
 parser.add_argument("--dest", type=Path, help='destino donde se va a dejar el csv')
-parser.add_argument("--threshold", type=int, help='destino donde se va a dejar el csv', required=False)
+parser.add_argument("--threshold", type=float, help='Ratio de vacios permitidos', required=False)
 args = parser.parse_args()
 
 folder = Path(args.folder)
@@ -21,7 +21,7 @@ if dest.suffix != '.csv':
    print('La ruta destino debe de ser un csv')
    exit()
 
-threshold= int(args.threshold) or 0.2
+threshold= float(args.threshold) or 0.2
 
 if threshold <0 or threshold >1:
    print('Revisa el threshold')
@@ -36,7 +36,7 @@ for f in csv_files:
       df = df_aux
       continue
    df = pd.concat([df,df_aux])
-mask = ~(df.isna().sum() / len(df) > threshold)
+mask = (df.notna().sum() / len(df)) >= threshold
 
 cols_to_keep = df.columns[mask].tolist()
 df = df[cols_to_keep]
