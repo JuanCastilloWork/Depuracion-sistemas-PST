@@ -1,0 +1,36 @@
+from enum import Enum,IntEnum
+from typing import Optional
+import pandas as pd
+from pathlib import Path
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--folder", type=Path, help='Carpetas donde se encuentran los csv')
+parser.add_argument("--dest", type=Path, help='destino donde se va a dejar el csv')
+args = parser.parse_args()
+
+folder = Path(args.folder)
+if not folder.exists() or not folder.is_dir():
+   print('Ingresa bien la ruta')
+   exit()
+
+dest = Path(args.dest)
+if dest.suffix != '.csv':
+   print('La ruta destino debe de ser un csv')
+   exit()
+
+csv_files = folder.glob('*.csv')
+df = None
+for f in csv_files:
+   df_aux = pd.read_csv(f,
+   )
+   if df is None:
+      df = df_aux
+      continue
+   df = pd.concat([df,df_aux])
+mask = ~(df.isna().sum() / len(df) > 0.2)
+
+cols_to_keep = df.columns[mask].tolist()
+df = df[cols_to_keep]
+df.to_csv(dest, sep=';',encoding='utf-8', index = False)
